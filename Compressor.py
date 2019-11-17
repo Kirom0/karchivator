@@ -41,6 +41,7 @@ class Compressor:
             self._keys = self.coder._keys
             self._splits_bits = self.coder._splits_bits
             self._splits_bytes = self.coder._splits_bytes
+            self._encoded_data_size = 0
 
         def append_data(self, generator):
             if not self._adding_allow:
@@ -59,6 +60,7 @@ class Compressor:
             def subgenerator(code, _item):
                 if type(_item) is int:
                     self._keys[_item] = list(code)
+                    self._encoded_data_size += self._cnt[_item] * len(list(code))
                 else:
                     subgenerator(list(code + [False]), _item.left)
                     subgenerator(list(code + [True]), _item.right)
@@ -152,7 +154,7 @@ class Compressor:
                     current_byte = 0
             if current_byte > 0:
                 result.append(current_byte)
-            result = [len(self._cnt)] + result + keys
+            result = [len(self._cnt) - 1] + result + keys
             return result
 
         def get_keys_count(self):
@@ -163,6 +165,10 @@ class Compressor:
 
         def get_sizes_of_parts(self):
             return self._splits_bits[1:]
+
+        def get_encoded_data_size(self):
+            return self._encoded_data_size
+
 
     class Decoder:
         def __init__(self):
@@ -204,7 +210,7 @@ class Compressor:
                 return res[::-1]
 
             it = iter(generator_data)
-            count = next(it)
+            count = next(it) + 1
             count_for_return = count + 1
             three = []
             index = 2
