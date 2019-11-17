@@ -1,8 +1,9 @@
 import unittest
-from Coder import Coder
+import os
+from Compressor import Compressor
 
 
-class Coder_tests(unittest.TestCase):
+class Compressor_tests(unittest.TestCase):
 
     @staticmethod
     def data_adding(coder):
@@ -25,10 +26,14 @@ class Coder_tests(unittest.TestCase):
                 return '1'
             return '0'
 
-        coder = Coder.Coder()
+        def file_data_gen(path):
+            yield from bytearray(os.path.basename(path), encoding='ascii')
+            yield from b'aaabbabbabbaabbbabbbccc'
+
+        coder = Compressor.Coder()
         data = list()
         data.append(b'abaacabaaa')
-        data.append(b'bbbbbbb')
+        #data.append(file_data_gen('one.txt'))
         data.append(b'asdahsdjhqiuwdqwjdoqwnduqbwudqnwoinqwubdyqwiodqwmduqibwdqowmdqwbdqwndiqmwdbqwyhdoqwimsuqwsyqjwsq')
         for i in data:
             coder.append_data(i)
@@ -36,9 +41,9 @@ class Coder_tests(unittest.TestCase):
         for i in coder.pack_sequence():
             ls.append(i)
 
-        decoder = Coder.Decoder()
+        decoder = Compressor.Decoder()
         decoder.decode_keys(coder.encode_keys())
-        decoder._splits_bits = coder.get_sizes_of_parts()
+        decoder.set_sizes_of_parts(coder.get_sizes_of_parts())
 
         ans = list()
         for j in range(len(data)):

@@ -4,7 +4,7 @@ def div_up(value, module):
     return value // module
 
 
-class Coder:
+class Compressor:
     def __init__(self):
         self._keys = {}
         self._splits_bits = [0]
@@ -34,7 +34,7 @@ class Coder:
 
     class Coder:
         def __init__(self):
-            self.coder = Coder()
+            self.coder = Compressor()
             self._cnt = {}
             self._data = []
             self._adding_allow = True
@@ -64,7 +64,7 @@ class Coder:
                     subgenerator(list(code + [True]), _item.right)
 
             if len(self._cnt) == 1:
-                raise Exception("Coder.Coder have got only one byte. Minimum 2 difference byte needed.")
+                raise Exception("Compressor.Compressor have got only one byte. Minimum 2 difference byte needed.")
             self._adding_allow = False
             dict = set()
             for item in self._cnt.items():
@@ -81,7 +81,7 @@ class Coder:
                     if i[0] < two[0]:
                         two = i
                 dict.remove(two)
-                dict.add((one[0] + two[0], Coder.ThreeNode(one[1], two[1])))
+                dict.add((one[0] + two[0], Compressor.ThreeNode(one[1], two[1])))
             self._root = min(dict)[1]
             subgenerator([], self._root)
 
@@ -133,6 +133,8 @@ class Coder:
                 fill_three(_three, n * 2, cur.left)
                 fill_three(_three, n * 2 + 1, cur.right)
 
+            if self._adding_allow:
+                self._generate_dictionary()
             three = [-1]
             fill_three(three, 1, self._root)
             result = []
@@ -153,27 +155,27 @@ class Coder:
             result = [len(self._cnt)] + result + keys
             return result
 
-        def get_keys(self):
-            return self._keys.copy()
+        def get_keys_count(self):
+            return len(self._keys)
 
         def get_root(self):
             return self._root
 
         def get_sizes_of_parts(self):
-            return self._splits_bits.copy()
+            return self._splits_bits[1:]
 
     class Decoder:
         def __init__(self):
-            self.coder = Coder()
+            self.coder = Compressor()
             self._keys = self.coder._keys
             self._splits_bits = self.coder._splits_bits
-            self._root = Coder.ThreeNode(-1, -1)
+            self._root = Compressor.ThreeNode(-1, -1)
 
         def unpack_sequence(self, data, part_number):
             def get_next_byte(_start_with, bit_count):
                 cur = self._root
                 for byte in data[_start_with:]:
-                    bins = Coder.byte_to_bin(byte)
+                    bins = Compressor.byte_to_bin(byte)
                     for i in bins:
                         if bit_count > 0:
                             bit_count -= 1
@@ -186,6 +188,7 @@ class Coder:
                                 cur = self._root
                         else:
                             return
+
             if self._root is None:
                 raise Exception("The keys are not detected")
             start_with = div_up(self._splits_bits[part_number], 8)
@@ -206,14 +209,14 @@ class Coder:
             three = []
             index = 2
             while len(three) < count:
-                bins = Coder.byte_to_bin(next(it))
+                bins = Compressor.byte_to_bin(next(it))
                 count_for_return += 1
                 for i in range(len(bins)):
                     if bins[i]:
                         three.append(way(i + index))
                 index += len(bins)
 
-            self._root = Coder.ThreeNode(-1, -1)
+            self._root = Compressor.ThreeNode(-1, -1)
 
             for i in range(count):
                 cur = self._root
@@ -221,11 +224,11 @@ class Coder:
                 for j in three[i][:-1]:
                     if not j:
                         if isinstance(cur.left, int):
-                            cur.left = Coder.ThreeNode(-1, -1)
+                            cur.left = Compressor.ThreeNode(-1, -1)
                         cur = cur.left
                     if j:
                         if isinstance(cur.right, int):
-                            cur.right = Coder.ThreeNode(-1, -1)
+                            cur.right = Compressor.ThreeNode(-1, -1)
                         cur = cur.right
                 if not three[i][-1]:
                     cur.left = key
@@ -233,3 +236,6 @@ class Coder:
                     cur.right = key
 
             return count_for_return
+
+        def set_sizes_of_parts(self, list_sizes_of_parts):
+            self._splits_bits = [0] + list_sizes_of_parts
