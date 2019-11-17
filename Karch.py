@@ -114,12 +114,14 @@ class Karch:
             self.decoder.set_sizes_of_parts(parts)
             parts = [0] + parts
             data = data[count + 2 + 5 * count_of_files:]
-            os.system("mkdir {}".format(file))
+            
+            os.system("mkdir {}".format(os.path.splitext(file)[0]))
+            _dir = bytearray(os.path.splitext(file)[0] + '/', encoding="utf-8")
             for i in range(count_of_files):
                 print("Unpacking file #{}".format(i))
                 file = bytearray(self.decoder.unpack_sequence(data, i))
                 print("Writing file #{}".format(i))
-                with open((bytearray(file + '/') + file[:names[i]]).decode('utf-8'), 'wb') as f:
+                with open((_dir + file[:names[i]]).decode('utf-8'), 'wb') as f:
                     f.write(file[names[i]:])
 
 
