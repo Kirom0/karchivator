@@ -25,24 +25,25 @@ class Coder_tests(unittest.TestCase):
                 return '1'
             return '0'
 
-        coder = Coder()
+        coder = Coder.Coder()
         data = list()
         data.append(b'abaacabaaa')
-        data.append(b'bbac')
+        data.append(b'bbbbbbb')
         data.append(b'asdahsdjhqiuwdqwjdoqwnduqbwudqnwoinqwubdyqwiodqwmduqibwdqowmdqwbdqwndiqmwdbqwyhdoqwimsuqwsyqjwsq')
-        coder.append_data(data[0])
-        coder.append_data(data[1])
+        for i in data:
+            coder.append_data(i)
         ls = list()
         for i in coder.pack_sequence():
             ls.append(i)
-        print(ls)
-        rt = []
-        for i in ls:
-            print(*list(map(to_bin, Coder_tests.byte_to_bin(i))), end='', sep='')
-        print()
+
+        decoder = Coder.Decoder()
+        decoder.decode_keys(coder.encode_keys())
+        decoder._splits_bits = coder.get_sizes_of_parts()
+
         ans = list()
-        for j in range(2):
+        for j in range(len(data)):
             ans.append(list())
-            for i in coder.unpack_sequence(ls, j):
+            for i in decoder.unpack_sequence(ls, j):
                 ans[j].append(i)
             self.assertEqual(list(bytearray(data[j])), ans[j])
+
