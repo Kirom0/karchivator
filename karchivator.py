@@ -1,6 +1,5 @@
 import argparse
-import os
-from Karch import Karch
+from karch import *
 
 parser = argparse.ArgumentParser(description='This program is an archiver with its own data type .karch')
 parser.add_argument('-u', '--unpack', type=str,
@@ -24,11 +23,11 @@ if not ((args.pack is None) ^ (args.unpack is None)):
 if args.pack is not None:
     if args.pack[-6:] != ".karch":
         args.pack += ".karch"
-    Karch.Coder(ask, args.pack, *args.sources)
+    Coder.coder(ask, args.pack, *args.sources)
 
 if args.unpack is not None:
     if args.unpack[-6:] != ".karch":
         args.unpack += ".karch"
-    Karch.Decoder(args.unpack)
+    Decoder.decoder(args.unpack)
 
 

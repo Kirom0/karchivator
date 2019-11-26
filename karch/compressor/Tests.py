@@ -1,9 +1,9 @@
 import unittest
 import os
-from Compressor import Compressor
+from karch.compressor import *
 
 
-class Compressor_tests(unittest.TestCase):
+class Tests(unittest.TestCase):
 
     @staticmethod
     def data_adding(coder):
@@ -30,25 +30,25 @@ class Compressor_tests(unittest.TestCase):
             yield from bytearray(os.path.basename(path), encoding='ascii')
             yield from b'aaabbabbabbaabbbabbbccc'
 
-        coder = Compressor.Coder()
+        compressor = Compressor.Compressor()
         data = list()
         data.append(b'abaacabaaa')
         #data.append(file_data_gen('one.txt'))
         data.append(b'asdahsdjhqiuwdqwjdoqwnduqbwudqnwoinqwubdyqwiodqwmduqibwdqowmdqwbdqwndiqmwdbqwyhdoqwimsuqwsyqjwsq')
         for i in data:
-            coder.append_data(i)
+            compressor.append_data(i)
         ls = list()
-        for i in coder.pack_sequence():
+        for i in compressor.pack_sequence():
             ls.append(i)
 
-        decoder = Compressor.Decoder()
-        decoder.decode_keys(coder.encode_keys())
-        decoder.set_sizes_of_parts(coder.get_sizes_of_parts())
+        decompressor = Decompressor.Decompressor()
+        decompressor.decode_keys(compressor.encode_keys())
+        decompressor.set_sizes_of_parts(compressor.get_sizes_of_parts())
 
         ans = list()
         for j in range(len(data)):
             ans.append(list())
-            for i in decoder.unpack_sequence(ls, j):
+            for i in decompressor.unpack_sequence(ls, j):
                 ans[j].append(i)
             self.assertEqual(list(bytearray(data[j])), ans[j])
 
