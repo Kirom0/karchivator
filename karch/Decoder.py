@@ -1,6 +1,7 @@
 import os
 from karch.compressor import *
 from karch.__init__ import bins_to_int
+from karch.__init__ import make_dir
 
 
 def decoder(archive_name):
@@ -32,7 +33,7 @@ def decoder(archive_name):
     decompressor.set_sizes_of_parts(parts)
     data = data[count + 2 + 5 * count_of_files:]
 
-    os.system("mkdir {}".format(os.path.splitext(archive_name)[0]))
+    make_dir(os.path.splitext(archive_name)[0])
     _dir = bytearray(os.path.splitext(archive_name)[0] + '/', encoding="utf-8")
     for i in range(count_of_files):
         print("Unpacking file #{}".format(i))

@@ -4,7 +4,6 @@ from karch.compressor import *
 
 
 class Tests(unittest.TestCase):
-
     @staticmethod
     def data_adding(coder):
         s = b'abaacabaaa'

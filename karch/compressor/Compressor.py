@@ -25,15 +25,15 @@ class Compressor:
                 self._cnt[byte] = 1
         self._splits_bytes.append(cnt + self._splits_bytes[-1])
 
-    def _generate_dictionary(self):
-        def subgenerator(code, _item):
-            if type(_item) is int:
-                self._keys[_item] = list(code)
-                self._encoded_data_size += self._cnt[_item] * len(list(code))
-            else:
-                subgenerator(list(code + [False]), _item.left)
-                subgenerator(list(code + [True]), _item.right)
+    def _sub_generate_dictionary(self, code, _item):
+        if type(_item) is int:
+            self._keys[_item] = list(code)
+            self._encoded_data_size += self._cnt[_item] * len(list(code))
+        else:
+            self._sub_generate_dictionary(list(code + [False]), _item.left)
+            self._sub_generate_dictionary(list(code + [True]), _item.right)
 
+    def _generate_dictionary(self):
         if len(self._cnt) == 1:
             raise Exception("compressor.compressor have got only one byte. Minimum 2 difference byte needed.")
         self._adding_allow = False
@@ -54,7 +54,7 @@ class Compressor:
             three.remove(two)
             three.add((one[0] + two[0], ThreeNode(one[1], two[1])))
         self._root = min(three)[1]
-        subgenerator([], self._root)
+        self._sub_generate_dictionary([], self._root)
 
     def pack_sequence(self):
         def get_next_data(_pos_beg, _pos_end):
