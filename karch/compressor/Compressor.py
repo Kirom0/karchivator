@@ -1,5 +1,6 @@
 from karch.compressor.__init__ import ThreeNode
 from karch.compressor.__init__ import div_up
+from console_progress import *
 
 
 class Compressor:
@@ -61,6 +62,8 @@ class Compressor:
             for byte in self._data[_pos_beg: _pos_end]:
                 yield self._keys[byte]
 
+        bytes_count = sum(self._splits_bytes)
+        work = Work.Work("Packing", bytes_count)
         if self._adding_allow:
             self._generate_dictionary()
         for part_number in range(len(self._splits_bytes) - 1):
@@ -77,6 +80,7 @@ class Compressor:
             pos = 128
             current_byte = 0
             for i in get_next_data(pos_beg, pos_end):
+                work.do_progress(work.progress + 1)
                 for b in i:
                     if b:
                         current_byte += pos
@@ -93,6 +97,7 @@ class Compressor:
                     pos //= 2
                     cnt -= 1
             self._splits_bits.append(div_up(self._splits_bits[-1], 8) * 8 + cnt)
+        work.finish()
 
     def encode_keys(self):
         def fill_three(_three, n, cur):
