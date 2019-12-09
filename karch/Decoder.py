@@ -1,7 +1,9 @@
 import os
 from karch.compressor import *
+from pathlib import Path
 from karch.__init__ import bins_to_int
 from karch.__init__ import make_dir
+from console_progress import *
 
 
 def decoder(archive_name):
@@ -33,13 +35,12 @@ def decoder(archive_name):
     decompressor.set_sizes_of_parts(parts)
     data = data[count + 2 + 5 * count_of_files:]
 
-    make_dir(os.path.splitext(archive_name)[0])
-    _dir = bytearray(os.path.splitext(archive_name)[0] + '/', encoding="utf-8")
+    archive = Path(os.path.splitext(archive_name)[0])
     for i in range(count_of_files):
-        print("Unpacking file #{}".format(i))
-        archive_name = bytearray(decompressor.unpack_sequence(data, i))
-        print("Writing file #{}".format(i))
-        with open((_dir + archive_name[:names[i]]).decode('utf-8'), 'wb') as f:
-            f.write(archive_name[names[i]:])
+        work = Work.Work("Unpacking files {}/{}".format(i + 1, count_of_files), 1)
+        archive_name = bytearray(decompressor.unpack_sequence(data, i, work))
+        _file = (archive / (archive_name[:names[i]]).decode('utf-8'))
+        make_dir(_file)
+        _file.write_bytes(archive_name[names[i]:])
 
     del decompressor

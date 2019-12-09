@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 from karch import *
 
 parser = argparse.ArgumentParser(description='This program is an archiver with its own data type .karch')
@@ -15,6 +16,28 @@ def ask(st):
     return ans[0] == 'y'
 
 
+def sources_to_path(*sources):
+    def bfs(path):
+        for x in path.iterdir():
+            if x.is_dir():
+                dirs.append(x)
+            if x.is_file():
+                result.add(x)
+
+    sources = [Path(x).resolve() for x in sources]
+    for i in sources:
+        if not i.exists():
+            raise Exception("Ошибка. Файла или директории {} не существует.".format(str(i.resolve())))
+    result = set(x for x in sources if x.is_file())
+    dirs = [x for x in sources if x.is_dir()]
+    current_dirs = 0
+    while current_dirs < len(dirs):
+        bfs(dirs[current_dirs])
+        current_dirs += 1
+
+    return list(result)
+
+
 args = parser.parse_args()
 
 if not ((args.pack is None) ^ (args.unpack is None)):
@@ -23,11 +46,9 @@ if not ((args.pack is None) ^ (args.unpack is None)):
 if args.pack is not None:
     if args.pack[-6:] != ".karch":
         args.pack += ".karch"
-    Coder.coder(ask, args.pack, *args.sources)
+    Coder.coder(ask, args.pack, *sources_to_path(*args.sources))
 
 if args.unpack is not None:
     if args.unpack[-6:] != ".karch":
         args.unpack += ".karch"
     Decoder.decoder(args.unpack)
-
-

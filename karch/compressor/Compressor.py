@@ -12,6 +12,7 @@ class Compressor:
         self._splits_bits = [0]
         self._splits_bytes = [0]
         self._encoded_data_size = 0
+        self.result_bytes = []
 
     def append_data(self, generator):
         if not self._adding_allow:
@@ -62,7 +63,7 @@ class Compressor:
             for byte in self._data[_pos_beg: _pos_end]:
                 yield self._keys[byte]
 
-        bytes_count = sum(self._splits_bytes)
+        bytes_count = self._splits_bytes[-1]
         work = Work.Work("Packing", bytes_count)
         if self._adding_allow:
             self._generate_dictionary()
@@ -79,6 +80,7 @@ class Compressor:
             cnt = 0
             pos = 128
             current_byte = 0
+            result_bytes_count = 0
             for i in get_next_data(pos_beg, pos_end):
                 work.do_progress(work.progress + 1)
                 for b in i:
@@ -87,15 +89,18 @@ class Compressor:
                     pos //= 2
                     if pos == 0:
                         pos = 128
+                        result_bytes_count += 1
                         yield current_byte
                         cnt += 8
                         current_byte = 0
             if pos < 128:
+                result_bytes_count += 1
                 yield current_byte
                 cnt += 8
                 while pos > 0:
                     pos //= 2
                     cnt -= 1
+            self.result_bytes.append(result_bytes_count)
             self._splits_bits.append(div_up(self._splits_bits[-1], 8) * 8 + cnt)
         work.finish()
 

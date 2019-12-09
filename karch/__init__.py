@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import sys
 
 __all__ = ["Coder", "Decoder"]
@@ -23,9 +24,16 @@ def int_to_bins(value, size):
 
 
 def make_dir(dirname):
-    sys_dev_null = ""
-    if sys.platform == "win32":
-        sys_dev_null = ">2 NUL"
-    if sys_dev_null == "linux2":
-        sys_dev_null = "2> /dev/null"
-    os.system("mkdir {} ".format(dirname) + sys_dev_null)
+    for i in list(dirname.parents)[::-1][1:]:
+        try:
+            i.mkdir()
+        except FileExistsError:
+            pass
+
+def cut_common_dir(pure_path, depth):
+    parents = list(pure_path.parts)[depth:]
+    result = Path('.')
+    for i in parents:
+        result = result.joinpath(i)
+
+    return str(result)

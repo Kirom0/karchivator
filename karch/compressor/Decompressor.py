@@ -9,9 +9,11 @@ class Decompressor:
         self._splits_bits = [0]
         self._root = ThreeNode(-1, -1)
 
-    def _get_next_byte(self, data, _start_with, bit_count):
+    def _get_next_byte(self, data, _start_with, bit_count, work):
         cur = self._root
-        for byte in data[_start_with:]:
+        for ix in range(_start_with, len(data)):
+            work.do_progress(work.progress + 1)
+            byte = data[ix]
             bins = byte_to_bin(byte)
             for i in bins:
                 if bit_count > 0:
@@ -26,15 +28,22 @@ class Decompressor:
                 else:
                     return
 
-    def unpack_sequence(self, data, part_number):
+    def unpack_sequence(self, data, part_number, work):
         if self._root is None:
             raise Exception("The keys are not detected")
         start_with = div_up(self._splits_bits[part_number], 8)
+        if part_number == len(self._splits_bits) - 1:
+            work.volume = len(data) - start_with
+        else:
+            work.volume = div_up(self._splits_bits[part_number + 1] - self._splits_bits[part_number], 8)
+        work.progress = 0
         yield from self._get_next_byte(
             data,
             start_with,
-            self._splits_bits[part_number + 1] - div_up(self._splits_bits[part_number], 8) * 8
+            self._splits_bits[part_number + 1] - div_up(self._splits_bits[part_number], 8) * 8,
+            work
         )
+        work.finish()
 
     def decode_keys(self, generator_data):
         def way(a):
