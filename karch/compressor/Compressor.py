@@ -64,7 +64,7 @@ class Compressor:
                 yield self._keys[byte]
 
         bytes_count = self._splits_bytes[-1]
-        work = Work.Work("Packing", bytes_count)
+        progress_bar = ProgressBar.ProgressBar("Packing", bytes_count)
         if self._adding_allow:
             self._generate_dictionary()
         for part_number in range(len(self._splits_bytes) - 1):
@@ -82,7 +82,7 @@ class Compressor:
             current_byte = 0
             result_bytes_count = 0
             for i in get_next_data(pos_beg, pos_end):
-                work.do_progress(work.progress + 1)
+                progress_bar.do_progress(progress_bar.progress + 1)
                 for b in i:
                     if b:
                         current_byte += pos
@@ -102,7 +102,7 @@ class Compressor:
                     cnt -= 1
             self.result_bytes.append(result_bytes_count)
             self._splits_bits.append(div_up(self._splits_bits[-1], 8) * 8 + cnt)
-        work.finish()
+        progress_bar.finish()
 
     def encode_keys(self):
         def fill_three(_three, n, cur):
