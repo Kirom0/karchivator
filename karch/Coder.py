@@ -11,7 +11,7 @@ def coder(asker, result_filename, *filenames):
     """
     :param asker: функция, которая запрашивает у пользователя разрешения
     :param result_filename: имя архива
-    :param filenames: список pure_paths с файлами, которые будут добавлены в архив
+    :param filenames: список pure_paths с файлами, которые будут добавлены в архив. ПУТИ ТОЛЬКО АБСОЛЮТНЫЕ
     :result: Создает архив с именем  result_filename, с запакованными в нем файлами из списка filenames
     """
     def file_data_gen(pure_path):
@@ -22,6 +22,7 @@ def coder(asker, result_filename, *filenames):
     if os.path.exists(result_filename):
         if not asker("Файл \"{}\" уже сущесвует. Перезаписать?".format(result_filename)):
             raise Exception("Ошибка. Отказ в записи.")
+
     for i in filenames:
         if not i.exists():
             raise Exception("Ошибка. Файл \"{}\" не найден.".format(i))

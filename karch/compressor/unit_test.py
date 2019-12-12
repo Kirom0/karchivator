@@ -1,4 +1,5 @@
 import unittest
+import random
 import os
 from karch.compressor import *
 from console_progress import *
@@ -19,6 +20,35 @@ class Test_compressor_and_decompressor(unittest.TestCase):
         while len(res) < 8:
             res.append(False)
         return res[::-1]
+
+    def test_two_key(self):
+        data = b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1'
+
+        compressor = Compressor.Compressor()
+        compressor.append_data(data)
+        packed_data = bytes(compressor.pack_sequence())
+
+        decompressor = Decompressor.Decompressor()
+        decompressor.decode_keys((compressor.encode_keys()))
+        decompressor.set_sizes_of_parts(compressor.get_sizes_of_parts())
+
+        self.assertEqual(data,
+                         bytes(decompressor.unpack_sequence(packed_data, 0, ProgressBar.ProgressBar('Unpacking', 1))))
+
+    def test_one_random_sequence(self):
+        data = bytearray()
+        for i in range(1000):
+            data += bytes([random.randint(0, 255)])
+
+        compressor = Compressor.Compressor()
+        compressor.append_data(data)
+        packed_data = bytes(compressor.pack_sequence())
+
+        decompressor = Decompressor.Decompressor()
+        decompressor.decode_keys((compressor.encode_keys()))
+        decompressor.set_sizes_of_parts(compressor.get_sizes_of_parts())
+
+        self.assertEqual(data, bytes(decompressor.unpack_sequence(packed_data, 0, ProgressBar.ProgressBar('Unpacking', 1))))
 
     def test_complicated(self):
         def to_bin(a):

@@ -48,6 +48,8 @@ def decoder(archive_name):
         parts.append(bins_to_int(bytearray(arch.read(4))))
         names.append(bins_to_int(bytearray(arch.read(1))))
 
+    arch.close()
+
     decompressor.set_sizes_of_parts(parts)
     data = data[count + 2 + 5 * count_of_files:]
 

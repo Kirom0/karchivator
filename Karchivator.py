@@ -38,17 +38,18 @@ def sources_to_path(*sources):
     return list(result)
 
 
-args = parser.parse_args()
+if __name__ == "__main__":
+    args = parser.parse_args()
 
-if not ((args.pack is None) ^ (args.unpack is None)):
-    exit("The program accepts only one parameter --pack or --unpack.")
+    if not ((args.pack is None) ^ (args.unpack is None)):
+        exit("The program accepts only one parameter --pack or --unpack.")
 
-if args.pack is not None:
-    if args.pack[-6:] != ".karch":
-        args.pack += ".karch"
-    Coder.coder(ask, args.pack, *sources_to_path(*args.sources))
+    if args.pack is not None:
+        if args.pack[-6:] != ".karch":
+            args.pack += ".karch"
+        Coder.coder(ask, args.pack, *sources_to_path(*args.sources))
 
-if args.unpack is not None:
-    if args.unpack[-6:] != ".karch":
-        args.unpack += ".karch"
-    Decoder.decoder(args.unpack)
+    if args.unpack is not None:
+        if args.unpack[-6:] != ".karch":
+            args.unpack += ".karch"
+        Decoder.decoder(args.unpack)
