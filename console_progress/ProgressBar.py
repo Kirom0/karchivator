@@ -1,7 +1,7 @@
 import sys, time
 
 
-class Work:
+class ProgressBar:
     def __init__(self, work_name, volume):
         self.progress = 0
         self.volume = volume

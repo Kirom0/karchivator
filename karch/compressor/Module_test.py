@@ -1,9 +1,10 @@
 import unittest
 import os
 from karch.compressor import *
+from console_progress import *
 
 
-class Tests(unittest.TestCase):
+class Test_compressor_and_decompressor(unittest.TestCase):
     @staticmethod
     def data_adding(coder):
         s = b'abaacabaaa'
@@ -19,7 +20,7 @@ class Tests(unittest.TestCase):
             res.append(False)
         return res[::-1]
 
-    def test_test(self):
+    def test_complicated(self):
         def to_bin(a):
             if a:
                 return '1'
@@ -45,9 +46,10 @@ class Tests(unittest.TestCase):
         decompressor.set_sizes_of_parts(compressor.get_sizes_of_parts())
 
         ans = list()
+
         for j in range(len(data)):
             ans.append(list())
-            for i in decompressor.unpack_sequence(ls, j):
+            for i in decompressor.unpack_sequence(ls, j, ProgressBar.ProgressBar("Unpacking {}/{}".format(j + 1, len(data)), 1)):
                 ans[j].append(i)
             self.assertEqual(list(bytearray(data[j])), ans[j])
 

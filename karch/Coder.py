@@ -2,11 +2,18 @@ import os
 from karch.compressor import *
 from karch.__init__ import int_to_bins
 from karch.__init__ import cut_common_dir
+from karch.__init__ import calculate_file_hash
 from karch.PackingInfo import PackingInfo
 from console_progress import *
 
 
 def coder(asker, result_filename, *filenames):
+    """
+    :param asker: функция, которая запрашивает у пользователя разрешения
+    :param result_filename: имя архива
+    :param filenames: список pure_paths с файлами, которые будут добавлены в архив
+    :result: Создает архив с именем  result_filename, с запакованными в нем файлами из списка filenames
+    """
     def file_data_gen(pure_path):
         yield from bytearray(cut_common_dir(pure_path, common_ancestor_depth), encoding='utf-8')
         yield from pure_path.read_bytes()
@@ -42,7 +49,7 @@ def coder(asker, result_filename, *filenames):
     result.write(b"karch")
 
     compressor = Compressor.Compressor()
-    work = Work.Work("Reading files", len(files))
+    work = ProgressBar.ProgressBar("Reading files", len(files))
     for i in range(len(files)):
         work.do_progress(i + 1)
         compressor.append_data(file_data_gen(files[i].file_pure_path))
@@ -72,6 +79,9 @@ def coder(asker, result_filename, *filenames):
             bytearray(int_to_bins(len(bytearray(cut_common_dir(filenames[i], common_ancestor_depth), encoding='utf-8')), 1)))
 
     result.close()
+    _hash = calculate_file_hash(result_filename, os.path.getsize(result_filename))
+    with open(result_filename, "ab") as result:
+        result.write(bytearray(int_to_bins(_hash, 4)))
 
     del compressor
 
